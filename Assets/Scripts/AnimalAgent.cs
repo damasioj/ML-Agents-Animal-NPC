@@ -90,6 +90,8 @@ public class AnimalAgent : Agent
         }
 
         energy--;
+
+        Debug.Log($"Current energy: {energy}");
     }
 
     private void Move(float[] vectorAction)
@@ -125,7 +127,7 @@ public class AnimalAgent : Agent
         if (distanceToTarget < 4f)
         {
             bool isConsumed = TargetScript.Consume(Time.deltaTime);
-            energy += 2;
+            energy += 3;
 
             if (energy > initialEnergy)
             {
