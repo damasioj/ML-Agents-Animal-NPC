@@ -567,9 +567,9 @@ GameObject:
   - component: {fileID: 654834229594976205}
   - component: {fileID: 6596393538982792866}
   - component: {fileID: 4859029617392749078}
-  - component: {fileID: 9148853110225227798}
-  - component: {fileID: 4665826802250773672}
   - component: {fileID: 3885897160456674090}
+  - component: {fileID: 8275982835136635032}
+  - component: {fileID: -4856203800514689014}
   m_Layer: 0
   m_Name: AnimalAgent
   m_TagString: Untagged
@@ -655,12 +655,28 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4640040050724630226}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &9148853110225227798
+--- !u!54 &3885897160456674090
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4640040050724630226}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 5
+  m_AngularDrag: 5
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &8275982835136635032
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -682,7 +698,7 @@ MonoBehaviour:
   m_InferenceDevice: 0
   m_BehaviorType: 1
   m_BehaviorName: AnimalBehavior
---- !u!114 &4665826802250773672
+--- !u!114 &-4856203800514689014
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -698,26 +714,10 @@ MonoBehaviour:
     maxStep: 0
     resetOnDone: 1
     onDemandDecision: 0
-    numberOfActionsBetweenDecisions: 8
+    numberOfActionsBetweenDecisions: 10
   speed: 10
   Target: {fileID: 7316529372830536239, guid: 5f2534b081704b54696c71f2dedbda2c, type: 3}
   energy: 500
---- !u!54 &3885897160456674090
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4640040050724630226}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 5
-  m_AngularDrag: 5
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1 &5282132672722113921
 GameObject:
   m_ObjectHideFlags: 0

@@ -139,9 +139,10 @@ public class AnimalAgent : Agent
 
     public override float[] Heuristic()
     {
-        var action = new float[2];
+        var action = new float[3];
         action[0] = Input.GetAxis("Horizontal");
         action[1] = Input.GetAxis("Vertical");
+        action[2] = Convert.ToSingle(Input.GetKey(KeyCode.E));
         return action;
     }
 }
