@@ -28,6 +28,7 @@ public class AnimalAgent : Agent
         if (other.name == "Boundary")
         {
             reachedBoundary = true;
+            AddReward(-0.1f);
             Done();
         }
     }
@@ -66,9 +67,6 @@ public class AnimalAgent : Agent
     
     public override void AgentAction(float[] vectorAction)
     {
-        // Add reward based on energy
-        AddReward(0.1f);
-
         // Animal died
         if (energy <= 0)
         {
@@ -80,14 +78,7 @@ public class AnimalAgent : Agent
         Move(vectorAction);
 
         // Action
-        Action(vectorAction);        
-
-        // Fell off platform
-        if (this.transform.localPosition.y < 0)
-        {
-            AddReward(-0.1f);
-            Done();
-        }
+        Action(vectorAction);       
 
         energy--;
 
@@ -126,8 +117,9 @@ public class AnimalAgent : Agent
         // Reached target
         if (distanceToTarget < 4f)
         {
-            bool isConsumed = TargetScript.Consume(Time.deltaTime);
+            bool isConsumed = TargetScript.Consume(0.1f);
             energy += 3;
+            AddReward(0.1f);
 
             if (energy > initialEnergy)
             {
