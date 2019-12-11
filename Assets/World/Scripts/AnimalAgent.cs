@@ -28,7 +28,7 @@ public class AnimalAgent : Agent
         if (other.name == "Boundary")
         {
             reachedBoundary = true;
-            AddReward(-0.1f);
+            SubtractReward(0.1f);
             Done();
         }
     }
@@ -70,7 +70,7 @@ public class AnimalAgent : Agent
         // Animal died
         if (energy <= 0)
         {
-            SetReward(-1f);
+            SubtractReward(0.1f);
             Done();
         }
 
@@ -138,5 +138,18 @@ public class AnimalAgent : Agent
         action[1] = Input.GetAxis("Vertical");
         action[2] = Convert.ToSingle(Input.GetKey(KeyCode.E));
         return action;
+    }
+
+    private void SubtractReward(float value)
+    {
+        if (GetReward() > 0.1f)
+        {
+            AddReward(value * -1);
+        }
+
+        if (GetReward() < 0.1f)
+        {
+            SetReward(-0.1f);
+        }
     }
 }

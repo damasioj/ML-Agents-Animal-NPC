@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6808768766203918716}
-  - component: {fileID: 7407422786058174276}
+  - component: {fileID: 6289911869123708623}
   m_Layer: 0
   m_Name: Boundary
   m_TagString: Untagged
@@ -24,14 +24,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2693474559626536621}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 3, y: 3, z: 4.7}
-  m_LocalScale: {x: 110.89494, y: -0.014052046, z: 0.2189}
+  m_LocalScale: {x: 106.26841, y: -0.0077464683, z: 0.20976749}
   m_Children: []
   m_Father: {fileID: 5444201704414854417}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &7407422786058174276
+--- !u!135 &6289911869123708623
 SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -379,16 +379,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5444201704414854417}
     m_Modifications:
-    - target: {fileID: -4856203800514689014, guid: 6ba31942d9d85f34a8661b5aae31073b,
-        type: 3}
-      propertyPath: Target
-      value: 
-      objectReference: {fileID: 6378909457610952234}
     - target: {fileID: 4640040050724630226, guid: 6ba31942d9d85f34a8661b5aae31073b,
         type: 3}
       propertyPath: m_Name
       value: AnimalAgent
       objectReference: {fileID: 0}
+    - target: {fileID: -4856203800514689014, guid: 6ba31942d9d85f34a8661b5aae31073b,
+        type: 3}
+      propertyPath: Target
+      value: 
+      objectReference: {fileID: 6378909457610952234}
     - target: {fileID: 6347055397140546590, guid: 6ba31942d9d85f34a8661b5aae31073b,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -459,21 +459,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 2.305
       objectReference: {fileID: 0}
-    - target: {fileID: 4859029617392749078, guid: 6ba31942d9d85f34a8661b5aae31073b,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4859029617392749078, guid: 6ba31942d9d85f34a8661b5aae31073b,
-        type: 3}
-      propertyPath: m_IsTrigger
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6596393538982792866, guid: 6ba31942d9d85f34a8661b5aae31073b,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7392043201829626838, guid: 6ba31942d9d85f34a8661b5aae31073b,
         type: 3}
       propertyPath: m_RootOrder
@@ -508,6 +493,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 2.9309955
+      objectReference: {fileID: 0}
+    - target: {fileID: 4859029617392749078, guid: 6ba31942d9d85f34a8661b5aae31073b,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4859029617392749078, guid: 6ba31942d9d85f34a8661b5aae31073b,
+        type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6596393538982792866, guid: 6ba31942d9d85f34a8661b5aae31073b,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6ba31942d9d85f34a8661b5aae31073b, type: 3}
