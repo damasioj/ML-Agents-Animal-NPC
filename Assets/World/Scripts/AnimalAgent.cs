@@ -6,29 +6,31 @@ using Barracuda;
 
 public class AnimalAgent : Agent
 {
-    private BambooAcademy m_Academy;
     private Vector3 maxVelocity;
     private bool reachedBoundary;
     private Rigidbody rBody;
-    private IConsumable[] TargetScripts;
-    private float initialEnergy;
-    private bool hitFoodSource;
-    private GameObject currentTarget;
+    private float initialEnergy;   
     
-    public float speed = 10f;
-    public FoodSource[] Targets;
+    public float speed;
     public float energy;
+
+    // target data
+    private int targetLimiter = 4; // used later for curriculum training
+    private GameObject currentTarget;
+    private IConsumable[] TargetScripts;
+    private bool hitTarget;
+    public FoodSource[] Targets;
+    
 
     void Start()
     {
-        m_Academy = FindObjectOfType<BambooAcademy>();
         rBody = GetComponent<Rigidbody>();
         maxVelocity = new Vector3(speed, 0f, speed);
         reachedBoundary = false;
-        hitFoodSource = false;
+        hitTarget = false;
         initialEnergy = energy;
 
-        // get scripts from targets
+        // get scripts from targets and initialize
         TargetScripts = new IConsumable[Targets.Length];
         for (int i = 0; i < Targets.Length; i++)
         {
@@ -38,16 +40,19 @@ public class AnimalAgent : Agent
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "wall")
+        if (!IsDone())
         {
-            reachedBoundary = true;
-            SubtractReward(0.1f);
-            Done();
-        }
-        else if (other.gameObject.tag == "food" || other.gameObject.tag == "badFood")
-        {
-            hitFoodSource = true;
-            currentTarget = other.gameObject;
+            if (other.tag == "wall")
+            {
+                reachedBoundary = true;
+                SubtractReward(0.5f);
+                Done();
+            }
+            else if (other.gameObject.tag == "food" || other.gameObject.tag == "badFood")
+            {
+                hitTarget = true;
+                currentTarget = other.gameObject;
+            }
         }
     }
 
@@ -55,13 +60,15 @@ public class AnimalAgent : Agent
     {
         if (other.gameObject.tag == "food" || other.gameObject.tag == "badFood")
         {
-            hitFoodSource = false;
+            hitTarget = false;
             currentTarget = null;
         }
     }
 
     public override void AgentReset()
     {
+        Debug.Log($"Reward: {GetCumulativeReward()}");
+
         // reset agent position
         if (this.transform.localPosition.y < 0 || reachedBoundary == true || IsMaxStepReached() || energy <= 0)
         {
@@ -71,35 +78,34 @@ public class AnimalAgent : Agent
             this.transform.localPosition = new Vector3(0, transform.localPosition.y, 0);
         }
 
-        // reset target
-        foreach(var target in TargetScripts)
-        {
-            target.Reset();
-        }
+        ResetTarget();
 
         energy = initialEnergy;
         reachedBoundary = false;
-        hitFoodSource = false;
+        hitTarget = false;
         currentTarget = null;
     }
 
     private void ResetTarget()
     {
-        var foodSourceAmount = m_Academy.
-        for (int i = 0; i < m_Academy.)
+        //targetLimiter = (int)m_Academy.resetParameters["number_food_sources"];
+        for (int i = 0; i < targetLimiter; i++)
+        {
+            TargetScripts[i].Reset();
+        }
     }
 
     public override void CollectObservations()
     {
         // Target and Agent positions
-        foreach(var target in Targets)
+        for(int i = 0; i < targetLimiter; i++)
         {
             float[] targetArr = new float[4] 
             {
-                target.transform.localPosition.x,
-                target.transform.localPosition.y,
-                target.transform.localPosition.z,
-                Convert.ToSingle(target.IsConsumed)
+                Targets[i].transform.localPosition.x,
+                Targets[i].transform.localPosition.y,
+                Targets[i].transform.localPosition.z,
+                Convert.ToSingle(Targets[i].IsConsumed)
             };
 
             AddVectorObs(targetArr);
@@ -122,7 +128,7 @@ public class AnimalAgent : Agent
             // Animal died
             if (energy <= 0)
             {
-                Debug.Log($"Reward: {GetReward()}");
+                SubtractReward(0.5f);
                 Done();
             }
 
@@ -162,14 +168,14 @@ public class AnimalAgent : Agent
 
     private void ConsumeFood()
     {
-        if (hitFoodSource)
+        if (hitTarget)
         {
             bool isConsumed = currentTarget.gameObject.GetComponent<IConsumable>().Consume(0.1f);
 
             if (currentTarget.tag == "food")
             {
                 energy += 3;
-                AddReward(0.3f);
+                AddReward(0.01f);
 
                 if (energy > initialEnergy)
                 {
@@ -178,14 +184,13 @@ public class AnimalAgent : Agent
             }
             else
             {
-                SubtractReward(0.2f);
+                SubtractReward(0.01f);
             }
 
             if (isConsumed)
             {
                 if (Targets.Where(x => x.tag == "food").All(x => x.IsConsumed == true))
                 {
-                    Debug.Log($"Reward: {GetReward()}");
                     Done();
                 }
             }
@@ -203,16 +208,6 @@ public class AnimalAgent : Agent
 
     private void SubtractReward(float value)
     {
-        //if (GetReward() > 0.1f)
-        //{
-        //    AddReward(value * -1);
-        //}
-
-        //if (GetReward() < 0.1f)
-        //{
-        //    SetReward(-0.1f);
-        //}
-
         AddReward(value * -1);
     }
 }
