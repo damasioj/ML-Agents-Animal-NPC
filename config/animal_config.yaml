@@ -1,21 +1,21 @@
 default:
     trainer: ppo
-    batch_size: 64
-    beta: 0.006
-    buffer_size: 4096
-    epsilon: 0.285
-    hidden_units: 192
-    lambd: 0.97
-    learning_rate: 0.03
+    batch_size: 124
+    beta: 0.0025
+    buffer_size: 8196
+    epsilon: 0.24
+    hidden_units: 92
+    lambd: 0.95
+    learning_rate: 0.004
     learning_rate_schedule: linear
-    max_steps: 2.0e5
+    max_steps: 3.0e5
     memory_size: 32
     normalize: false
-    num_epoch: 8
+    num_epoch: 5
     num_layers: 2
-    time_horizon: 766
+    time_horizon: 8192
     sequence_length: 64
-    summary_freq: 1000
+    summary_freq: 2000
     use_recurrent: false
     vis_encode_type: simple
     reward_signals:
@@ -23,6 +23,32 @@ default:
             strength: 1.0
             gamma: 0.99
     
+# working second agent -- 80k
+# default:
+    # trainer: ppo
+    # batch_size: 64
+    # beta: 0.006
+    # buffer_size: 4098
+    # epsilon: 0.285
+    # hidden_units: 96
+    # lambd: 0.97 
+    # learning_rate: 0.04
+    # learning_rate_schedule: linear
+    # max_steps: 2.0e5
+    # memory_size: 32
+    # normalize: false
+    # num_epoch: 9
+    # num_layers: 2
+    # time_horizon: 512
+    # sequence_length: 64
+    # summary_freq: 2000
+    # use_recurrent: false
+    # vis_encode_type: simple
+    # reward_signals:
+        # extrinsic:
+            # strength: 1.0
+            # gamma: 0.99
+
 # working first agent -- 200k
 # default:
     # trainer: ppo

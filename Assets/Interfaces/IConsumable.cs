@@ -7,4 +7,5 @@
     /// <returns></returns>
     bool Consume(float value);
     void Reset();
+    bool IsConsumed { get; }
 }

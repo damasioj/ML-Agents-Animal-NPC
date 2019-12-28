@@ -691,10 +691,10 @@ MonoBehaviour:
   m_BrainParameters:
     vectorObservationSize: 9
     numStackedVectorObservations: 1
-    vectorActionSize: 03000000
+    vectorActionSize: 020000000200000001000000
     vectorActionDescriptions: []
-    vectorActionSpaceType: 1
-  m_Model: {fileID: 5022602860645237092, guid: 2dcd0e3487e1a964aa023598f2246b04, type: 3}
+    vectorActionSpaceType: 0
+  m_Model: {fileID: 5022602860645237092, guid: 09cb2015d8b08eb4eb9578a100a30055, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: AnimalBehavior
@@ -714,10 +714,10 @@ MonoBehaviour:
     maxStep: 0
     resetOnDone: 1
     onDemandDecision: 0
-    numberOfActionsBetweenDecisions: 10
+    numberOfActionsBetweenDecisions: 20
   speed: 5
   Target: {fileID: 7316529372830536239, guid: 5f2534b081704b54696c71f2dedbda2c, type: 3}
-  energy: 500
+  energy: 600
 --- !u!1 &5282132672722113921
 GameObject:
   m_ObjectHideFlags: 0
