@@ -669,8 +669,8 @@ Rigidbody:
   m_GameObject: {fileID: 4640040050724630226}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 5
-  m_AngularDrag: 5
+  m_Drag: 10
+  m_AngularDrag: 10
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -689,12 +689,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    vectorObservationSize: 9
+    vectorObservationSize: 26
     numStackedVectorObservations: 1
-    vectorActionSize: 020000000200000001000000
+    vectorActionSize: 03000000
     vectorActionDescriptions: []
-    vectorActionSpaceType: 0
-  m_Model: {fileID: 5022602860645237092, guid: 09cb2015d8b08eb4eb9578a100a30055, type: 3}
+    vectorActionSpaceType: 1
+  m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: AnimalBehavior
@@ -714,10 +714,10 @@ MonoBehaviour:
     maxStep: 0
     resetOnDone: 1
     onDemandDecision: 0
-    numberOfActionsBetweenDecisions: 20
-  speed: 5
-  Target: {fileID: 7316529372830536239, guid: 5f2534b081704b54696c71f2dedbda2c, type: 3}
+    numberOfActionsBetweenDecisions: 15
+  speed: 30
   energy: 600
+  Targets: []
 --- !u!1 &5282132672722113921
 GameObject:
   m_ObjectHideFlags: 0

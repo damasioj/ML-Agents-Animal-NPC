@@ -15,7 +15,7 @@ public class AnimalAgent : Agent
     public float energy;
 
     // target data
-    private int targetLimiter = 4; // used later for curriculum training
+    private int targetLimiter = 1; // used later for curriculum training
     private GameObject currentTarget;
     private IConsumable[] TargetScripts;
     private bool hitTarget;
@@ -35,7 +35,12 @@ public class AnimalAgent : Agent
         for (int i = 0; i < Targets.Length; i++)
         {
             TargetScripts[i] = Targets[i].GetComponent<IConsumable>();
+
+            //Targets[i].Consume(100);
+            Targets[i].enabled = false;
         }
+
+        ResetTarget();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -45,7 +50,7 @@ public class AnimalAgent : Agent
             if (other.tag == "wall")
             {
                 reachedBoundary = true;
-                SubtractReward(0.5f);
+                SubtractReward(0.6f);
                 Done();
             }
             else if (other.gameObject.tag == "food" || other.gameObject.tag == "badFood")
@@ -89,8 +94,26 @@ public class AnimalAgent : Agent
     private void ResetTarget()
     {
         //targetLimiter = (int)m_Academy.resetParameters["number_food_sources"];
+
+        if (targetLimiter < 4)
+        {
+            if (GetCumulativeReward() >= 1.2f && targetLimiter == 3)
+            {
+                targetLimiter = 4;
+            }
+            else if (GetCumulativeReward() >= 1.0f)
+            {
+                targetLimiter = 3;
+            }
+            else if (GetCumulativeReward() >= 0.01)
+            {
+                targetLimiter = 2;
+            }
+        }
+
         for (int i = 0; i < targetLimiter; i++)
         {
+            Targets[i].enabled = true;
             TargetScripts[i].Reset();
         }
     }
@@ -100,12 +123,13 @@ public class AnimalAgent : Agent
         // Target and Agent positions
         for(int i = 0; i < targetLimiter; i++)
         {
-            float[] targetArr = new float[4] 
+            float[] targetArr = new float[5] 
             {
                 Targets[i].transform.localPosition.x,
                 Targets[i].transform.localPosition.y,
                 Targets[i].transform.localPosition.z,
-                Convert.ToSingle(Targets[i].IsConsumed)
+                Convert.ToSingle(Targets[i].IsConsumed),
+                Convert.ToSingle(Targets[i].IsGoodConsumable)
             };
 
             AddVectorObs(targetArr);

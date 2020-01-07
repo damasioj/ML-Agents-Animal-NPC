@@ -8,4 +8,5 @@
     bool Consume(float value);
     void Reset();
     bool IsConsumed { get; }
+    bool IsGoodConsumable { get; }
 }

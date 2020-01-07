@@ -6,21 +6,28 @@ public class FoodSource : MonoBehaviour, IConsumable
     [SerializeField] private float range;
 
     public bool IsConsumed { get; private set; }
+    public bool IsGoodConsumable
+    {
+        get
+        {
+            return tag == "food";
+        }
+    }
 
-    private float initialHealth;
+    private float hp;
     private float yPos;
 
     void Start()
     {
-        initialHealth = health;
+        hp = health;
         yPos = gameObject.transform.localPosition.y;
     }
 
     public bool Consume(float value)
     {
-        health -= value;
+        hp -= value;
 
-        if (health <= 0)
+        if (hp <= 0)
         {
             IsConsumed = true;
             gameObject.transform.localPosition = new Vector3(99f, 99f, 99f);
@@ -32,7 +39,7 @@ public class FoodSource : MonoBehaviour, IConsumable
 
     public void Reset()
     {
-        health = initialHealth;
+        hp = health;
         IsConsumed = false;
         gameObject.transform.localPosition = new Vector3(Random.Range(-1f, 1f) * range,
                                                         yPos,
