@@ -9,7 +9,8 @@ public class AnimalAgent : Agent
     private Vector3 maxVelocity;
     private bool reachedBoundary;
     private Rigidbody rBody;
-    private float initialEnergy;   
+    private float initialEnergy;
+    private BehaviorParameters policy;
     
     public float speed;
     public float energy;
@@ -29,6 +30,7 @@ public class AnimalAgent : Agent
         reachedBoundary = false;
         hitTarget = false;
         initialEnergy = energy;
+        policy = GetComponent<BehaviorParameters>();
 
         // get scripts from targets and initialize
         TargetScripts = new IConsumable[Targets.Length];
@@ -36,11 +38,20 @@ public class AnimalAgent : Agent
         {
             TargetScripts[i] = Targets[i].GetComponent<IConsumable>();
 
-            //Targets[i].Consume(100);
+            Targets[i].Consume(100);
             Targets[i].enabled = false;
         }
 
         ResetTarget();
+    }
+
+    // used to update the vector observation size dynamically
+    private void UpdatePolicy()
+    {
+        int baseSize = 4; // refactor
+        int additionalVectors = targetLimiter * 4;
+
+        policy.brainParameters.vectorObservationSize = baseSize + additionalVectors;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -97,19 +108,21 @@ public class AnimalAgent : Agent
 
         if (targetLimiter < 4)
         {
-            if (GetCumulativeReward() >= 1.2f && targetLimiter == 3)
+            if (GetCumulativeReward() >= 1.75f && targetLimiter == 3)
             {
                 targetLimiter = 4;
             }
-            else if (GetCumulativeReward() >= 1.0f)
+            else if (GetCumulativeReward() >= 1.25f)
             {
                 targetLimiter = 3;
             }
-            else if (GetCumulativeReward() >= 0.01)
+            else if (GetCumulativeReward() >= 0.5f)
             {
                 targetLimiter = 2;
             }
         }
+
+        UpdatePolicy();
 
         for (int i = 0; i < targetLimiter; i++)
         {
@@ -123,10 +136,9 @@ public class AnimalAgent : Agent
         // Target and Agent positions
         for(int i = 0; i < targetLimiter; i++)
         {
-            float[] targetArr = new float[5] 
+            float[] targetArr = new float[4] 
             {
                 Targets[i].transform.localPosition.x,
-                Targets[i].transform.localPosition.y,
                 Targets[i].transform.localPosition.z,
                 Convert.ToSingle(Targets[i].IsConsumed),
                 Convert.ToSingle(Targets[i].IsGoodConsumable)
@@ -160,7 +172,7 @@ public class AnimalAgent : Agent
             Move(vectorAction);
 
             // Action
-            Action(vectorAction);
+            //Action(vectorAction);
 
             energy--;
         }
@@ -176,6 +188,34 @@ public class AnimalAgent : Agent
         if (rBody.velocity.magnitude < maxVelocity.magnitude)
         {
             rBody.velocity += controlSignal * speed;
+        }
+
+        if (hitTarget)
+        {
+            bool isConsumed = currentTarget.gameObject.GetComponent<IConsumable>().Consume(0.1f);
+
+            if (currentTarget.tag == "food")
+            {
+                energy += 3;
+                AddReward(0.01f);
+
+                if (energy > initialEnergy)
+                {
+                    energy = initialEnergy;
+                }
+            }
+            else
+            {
+                SubtractReward(0.01f);
+            }
+
+            if (isConsumed)
+            {
+                if (Targets.Where(x => x.tag == "food").All(x => x.IsConsumed == true))
+                {
+                    Done();
+                }
+            }
         }
     }
     
@@ -226,7 +266,7 @@ public class AnimalAgent : Agent
         var action = new float[3];
         action[0] = Input.GetAxis("Horizontal");
         action[1] = Input.GetAxis("Vertical");
-        action[2] = Input.GetKey(KeyCode.E) ? 1.0f : 0.0f;
+        //action[2] = Input.GetKey(KeyCode.E) ? 1.0f : 0.0f;
         return action;
     }
 

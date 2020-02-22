@@ -1,31 +1,69 @@
 default:
     trainer: ppo
-    batch_size: 64
+    batch_size: 32
     beta: 0.001
-    buffer_size: 8192
-    epsilon: 0.2
-    hidden_units: 128
+    buffer_size: 4096
+    epsilon: 0.25
+    hidden_units: 32
     lambd: 0.95
-    learning_rate: 0.1
+    learning_rate: 0.2
     learning_rate_schedule: linear
-    max_steps: 4.0e5
-    memory_size: 32
+    max_steps: 1.0e6
     normalize: true
-    num_epoch: 9
+    num_epoch: 3
     num_layers: 2
     time_horizon: 1024
-    sequence_length: 64
-    summary_freq: 1000
+    summary_freq: 3000
+    
+    # rnn
     use_recurrent: false
+    sequence_length: 64
+    memory_size: 32
+    
     vis_encode_type: simple
     reward_signals:
         extrinsic:
             strength: 1.0
             gamma: 0.99
+        #curiosity:
+        #    strength: 0.01
+        #    gamma: 0.8
+        #    encoding_size: 64
+            
+#SAC 
+# default:
+    # trainer: sac
+    # batch_size: 128
+    # beta: 0.0005
+    # buffer_size: 150000
+    # buffer_init_steps: 6000
+    # init_entcoef: 0.7
+    # train_interval: 3
+    # num_update: 1
+    # tau: 0.09
+    # epsilon: 0.18
+    # hidden_units: 32
+    # lambd: 0.94
+    # learning_rate: 0.01
+    # learning_rate_schedule: linear
+    # max_steps: 4.0e5
+    # memory_size: 32
+    # normalize: false
+    # num_epoch: 8
+    # num_layers: 2
+    # time_horizon: 1024
+    # sequence_length: 64
+    # summary_freq: 1000
+    # use_recurrent: false
+    # vis_encode_type: simple
+    # reward_signals:
+        # extrinsic:
+            # strength: 1.0
+            # gamma: 0.8
         # curiosity:
             # strength: 0.01
-            # gamma: 0.99
-            # encoding_size: 256
+            # gamma: 0.8
+            # encoding_size: 64
     
 # working second agent -- 80k
 # default:

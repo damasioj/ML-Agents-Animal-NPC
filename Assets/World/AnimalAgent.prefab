@@ -691,7 +691,7 @@ MonoBehaviour:
   m_BrainParameters:
     vectorObservationSize: 26
     numStackedVectorObservations: 1
-    vectorActionSize: 03000000
+    vectorActionSize: 02000000
     vectorActionDescriptions: []
     vectorActionSpaceType: 1
   m_Model: {fileID: 0}
@@ -714,7 +714,7 @@ MonoBehaviour:
     maxStep: 0
     resetOnDone: 1
     onDemandDecision: 0
-    numberOfActionsBetweenDecisions: 15
+    numberOfActionsBetweenDecisions: 10
   speed: 30
   energy: 600
   Targets: []
