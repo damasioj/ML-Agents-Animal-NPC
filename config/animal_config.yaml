@@ -1,26 +1,26 @@
 default:
     trainer: ppo
-    batch_size: 32
+    batch_size: 256
     beta: 0.001
-    buffer_size: 4096
-    epsilon: 0.25
+    buffer_size: 5120
+    epsilon: 0.28
     hidden_units: 32
-    lambd: 0.95
-    learning_rate: 0.2
-    learning_rate_schedule: linear
-    max_steps: 1.0e6
+    lambd: 0.98
+    learning_rate: 0.005
+    learning_rate_schedule: constant
+    max_steps: 5.0e5
     normalize: true
-    num_epoch: 3
-    num_layers: 2
+    num_epoch: 4
+    num_layers: 1
     time_horizon: 1024
-    summary_freq: 3000
+    summary_freq: 5000
     
     # rnn
     use_recurrent: false
     sequence_length: 64
-    memory_size: 32
+    memory_size: 16
     
-    vis_encode_type: simple
+    vis_encode_type: nature_cnn
     reward_signals:
         extrinsic:
             strength: 1.0
@@ -29,6 +29,10 @@ default:
         #    strength: 0.01
         #    gamma: 0.8
         #    encoding_size: 64
+        gail:
+            strength: 0.1
+            gamma: 0.99
+            demo_path: C:\Users\joshu\Documents\GitHub\AnimalSimulation\Assets\Demonstrations\AnimalDemo.demo
             
 #SAC 
 # default:

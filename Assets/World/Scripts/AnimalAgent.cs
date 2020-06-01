@@ -1,181 +1,129 @@
-﻿using MLAgents;
-using System;
+﻿using Unity.MLAgents;
+using Unity.MLAgents.Sensors;
 using UnityEngine;
-using System.Linq;
-using Barracuda;
 
 public class AnimalAgent : Agent
 {
     private Vector3 maxVelocity;
-    private bool reachedBoundary;
+    private bool hitBoundary;
+    private bool isKilled;
     private Rigidbody rBody;
     private float initialEnergy;
-    private BehaviorParameters policy;
     
     public float speed;
     public float energy;
 
     // target data
-    private int targetLimiter = 1; // used later for curriculum training
-    private GameObject currentTarget;
-    private IConsumable[] TargetScripts;
     private bool hitTarget;
-    public FoodSource[] Targets;
-    
+    public BaseTarget Target;
+
+    // enemy
+    [SerializeField] Enemy enemy;
 
     void Start()
     {
         rBody = GetComponent<Rigidbody>();
         maxVelocity = new Vector3(speed, 0f, speed);
-        reachedBoundary = false;
+        hitBoundary = false;
         hitTarget = false;
         initialEnergy = energy;
-        policy = GetComponent<BehaviorParameters>();
-
-        // get scripts from targets and initialize
-        TargetScripts = new IConsumable[Targets.Length];
-        for (int i = 0; i < Targets.Length; i++)
-        {
-            TargetScripts[i] = Targets[i].GetComponent<IConsumable>();
-
-            Targets[i].Consume(100);
-            Targets[i].enabled = false;
-        }
-
-        ResetTarget();
     }
 
-    // used to update the vector observation size dynamically
-    private void UpdatePolicy()
+    void FixedUpdate()
     {
-        int baseSize = 4; // refactor
-        int additionalVectors = targetLimiter * 4;
-
-        policy.brainParameters.vectorObservationSize = baseSize + additionalVectors;
+        if (hitBoundary || isKilled)
+        {
+            EndEpisode();
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!IsDone())
+        switch (other.tag)
         {
-            if (other.tag == "wall")
-            {
-                reachedBoundary = true;
-                SubtractReward(0.6f);
-                Done();
-            }
-            else if (other.gameObject.tag == "food" || other.gameObject.tag == "badFood")
-            {
+            case "wall":
+                if (!hitBoundary)
+                {
+                    hitBoundary = true;
+                    SubtractReward(0.1f);
+                    Debug.Log($"Current Reward: {GetCumulativeReward()}");
+                }
+                break;
+            case "food":
                 hitTarget = true;
-                currentTarget = other.gameObject;
-            }
+                break;
+            case "enemy":
+                if (!isKilled)
+                {
+                    isKilled = true;
+                    SubtractReward(0.2f);
+                    Debug.Log($"Current Reward: {GetCumulativeReward()}");
+                }
+                break;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == "food" || other.gameObject.tag == "badFood")
+        if (other.gameObject.CompareTag("food"))
         {
             hitTarget = false;
-            currentTarget = null;
         }
     }
 
-    public override void AgentReset()
+    public override void OnEpisodeBegin()
     {
-        Debug.Log($"Reward: {GetCumulativeReward()}");
-
-        // reset agent position
-        if (this.transform.localPosition.y < 0 || reachedBoundary == true || IsMaxStepReached() || energy <= 0)
+        // reset agent
+        if (hitBoundary || energy <= 0 || isKilled)
         {
-            // If the Agent fell, zero its momentum
-            this.rBody.angularVelocity = Vector3.zero;
-            this.rBody.velocity = Vector3.zero;
-            this.transform.localPosition = new Vector3(0, transform.localPosition.y, 0);
+            rBody.angularVelocity = Vector3.zero;
+            rBody.velocity = Vector3.zero;
+            transform.localPosition = new Vector3(0, transform.localPosition.y, 0);
+            energy = initialEnergy;
+            enemy.Reset();
+            isKilled = false;
         }
 
-        ResetTarget();
-
-        energy = initialEnergy;
-        reachedBoundary = false;
+        Target.Reset();        
+        hitBoundary = false;
         hitTarget = false;
-        currentTarget = null;
     }
 
-    private void ResetTarget()
+    public override void CollectObservations(VectorSensor sensor)
     {
-        //targetLimiter = (int)m_Academy.resetParameters["number_food_sources"];
+        // Target
+        sensor.AddObservation(Target.transform.localPosition); // 3
+        
+        if (Target is IConsumable cons)
+            sensor.AddObservation(cons.IsConsumed);
 
-        if (targetLimiter < 4)
-        {
-            if (GetCumulativeReward() >= 1.75f && targetLimiter == 3)
-            {
-                targetLimiter = 4;
-            }
-            else if (GetCumulativeReward() >= 1.25f)
-            {
-                targetLimiter = 3;
-            }
-            else if (GetCumulativeReward() >= 0.5f)
-            {
-                targetLimiter = 2;
-            }
-        }
-
-        UpdatePolicy();
-
-        for (int i = 0; i < targetLimiter; i++)
-        {
-            Targets[i].enabled = true;
-            TargetScripts[i].Reset();
-        }
-    }
-
-    public override void CollectObservations()
-    {
-        // Target and Agent positions
-        for(int i = 0; i < targetLimiter; i++)
-        {
-            float[] targetArr = new float[4] 
-            {
-                Targets[i].transform.localPosition.x,
-                Targets[i].transform.localPosition.z,
-                Convert.ToSingle(Targets[i].IsConsumed),
-                Convert.ToSingle(Targets[i].IsGoodConsumable)
-            };
-
-            AddVectorObs(targetArr);
-        }        
-
-        AddVectorObs(this.transform.localPosition);
-
-        // Agent velocity
-        AddVectorObs(rBody.velocity.x);
-        AddVectorObs(rBody.velocity.z);
+        // agent
+        sensor.AddObservation(transform.localPosition); // 3
+        sensor.AddObservation(rBody.velocity.x); // 1
+        sensor.AddObservation(rBody.velocity.z); // 1
 
         // Energy
-        AddVectorObs(energy);
-    }
-    
-    public override void AgentAction(float[] vectorAction)
+        sensor.AddObservation(energy);
+
+        // enemy
+        sensor.AddObservation(enemy.Location); // 3
+        sensor.AddObservation(enemy.Velocity); // 3
+     }
+
+    public override void OnActionReceived(float[] vectorAction)
     {
-        if (!IsDone())
+        // Animal died
+        if (energy <= 0)
         {
-            // Animal died
-            if (energy <= 0)
-            {
-                SubtractReward(0.5f);
-                Done();
-            }
-
-            // Move
-            Move(vectorAction);
-
-            // Action
-            //Action(vectorAction);
-
-            energy--;
+            SubtractReward(0.1f);
+            Debug.Log($"Current Reward: {GetCumulativeReward()}");
+            EndEpisode();
         }
+
+        // Move
+        Move(vectorAction);
+
+        energy--;
     }
 
     private void Move(float[] vectorAction)
@@ -192,10 +140,10 @@ public class AnimalAgent : Agent
 
         if (hitTarget)
         {
-            bool isConsumed = currentTarget.gameObject.GetComponent<IConsumable>().Consume(0.1f);
-
-            if (currentTarget.tag == "food")
+            if (Target is IConsumable cons)
             {
+                bool isConsumed = cons.Consume(0.1f);
+
                 energy += 3;
                 AddReward(0.01f);
 
@@ -203,71 +151,21 @@ public class AnimalAgent : Agent
                 {
                     energy = initialEnergy;
                 }
-            }
-            else
-            {
-                SubtractReward(0.01f);
-            }
 
-            if (isConsumed)
-            {
-                if (Targets.Where(x => x.tag == "food").All(x => x.IsConsumed == true))
+                if (isConsumed)
                 {
-                    Done();
-                }
-            }
-        }
-    }
-    
-    private void Action(float[] vectorAction)
-    {
-        // Action, size = 1
-        int action = (int)vectorAction[2];
-
-        if (action == 1)
-        {
-            ConsumeFood();
-        }
-    }
-
-    private void ConsumeFood()
-    {
-        if (hitTarget)
-        {
-            bool isConsumed = currentTarget.gameObject.GetComponent<IConsumable>().Consume(0.1f);
-
-            if (currentTarget.tag == "food")
-            {
-                energy += 3;
-                AddReward(0.01f);
-
-                if (energy > initialEnergy)
-                {
-                    energy = initialEnergy;
-                }
-            }
-            else
-            {
-                SubtractReward(0.01f);
-            }
-
-            if (isConsumed)
-            {
-                if (Targets.Where(x => x.tag == "food").All(x => x.IsConsumed == true))
-                {
-                    Done();
+                    Debug.Log($"Current Reward: {GetCumulativeReward()}");
+                    EndEpisode();
                 }
             }
         }
     }
 
-    public override float[] Heuristic()
+    public override void Heuristic(float[] actions)
     {
-        var action = new float[3];
-        action[0] = Input.GetAxis("Horizontal");
-        action[1] = Input.GetAxis("Vertical");
+        actions[0] = Input.GetAxis("Horizontal");
+        actions[1] = Input.GetAxis("Vertical");
         //action[2] = Input.GetKey(KeyCode.E) ? 1.0f : 0.0f;
-        return action;
     }
 
     private void SubtractReward(float value)
