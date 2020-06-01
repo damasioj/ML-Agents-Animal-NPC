@@ -12,5 +12,5 @@ The following goals of this project is to simulate an animal:
 
 - [x] reaching a point in space
 - [x] reaching and consuming an object
-- [ ] reaching and consuming multiple objects while avoiding bad ones
+- [ ] reaching and consuming an object while avoiding danger
 - [ ] reaching and consuming multiple objects while avoiding danger
