@@ -20,7 +20,7 @@ public class FoodTarget : BaseTarget, IConsumable
     void Start()
     {
         hp = health;
-        yPos = gameObject.transform.localPosition.y;
+        yPos = gameObject.transform.position.y;
     }
 
     public bool Consume(float value)
@@ -30,7 +30,7 @@ public class FoodTarget : BaseTarget, IConsumable
         if (hp <= 0)
         {
             IsConsumed = true;
-            gameObject.transform.localPosition = new Vector3(99f, 99f, 99f);
+            //gameObject.transform.position = new Vector3(99f, 99f, 99f);
             return true;
         }
 
@@ -41,7 +41,7 @@ public class FoodTarget : BaseTarget, IConsumable
     {
         hp = health;
         IsConsumed = false;
-        gameObject.transform.localPosition = new Vector3(Random.Range(-1f, 1f) * range,
+        gameObject.transform.position = new Vector3(Random.Range(-1f, 1f) * range,
                                                         yPos,
                                                         Random.Range(-1f, 1f) * range);
         TargetHit = false;

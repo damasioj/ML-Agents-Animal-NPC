@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private AnimalAgent agent;
     [SerializeField] private float range;
     [SerializeField] private float maxSpeed;
+    [SerializeField] private float speedMultiplier;
     private Rigidbody rBody;
 
     public Vector3 Location
@@ -53,23 +52,22 @@ public class Enemy : MonoBehaviour
 
         if (agent.transform.localPosition.x > Location.x)
         {
-            x = 7;
+            x = speedMultiplier;
         }
         else
         {
-            x = -7;
+            x = -speedMultiplier;
         }
 
         if (agent.transform.localPosition.z > Location.z)
         {
-            z = 7;
+            z = speedMultiplier;
         }
         else
         {
-            z = -7;
+            z = -speedMultiplier;
         }
 
-        //Location = new Vector3(x, Location.y, z);
         Move(x, z);
     }
 

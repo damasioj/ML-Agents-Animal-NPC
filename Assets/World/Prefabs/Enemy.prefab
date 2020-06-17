@@ -107,8 +107,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 0}
-  range: 90
-  maxSpeed: 80
+  range: 400
+  maxSpeed: 100
+  speedMultiplier: 20
 --- !u!54 &2628611369051905598
 Rigidbody:
   m_ObjectHideFlags: 0

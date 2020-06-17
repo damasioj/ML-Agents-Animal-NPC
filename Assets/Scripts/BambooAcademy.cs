@@ -1,44 +1,38 @@
-﻿using Unity.MLAgents;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Unity.MLAgents;
 using UnityEngine;
 
 public class BambooAcademy : MonoBehaviour
 {
-    private Academy bambooAcedemy;
-    private Agent agent;
-    private FoodTarget target;
+    private Academy bambooAcademy;
+    private AnimalAgent agent;
+    private List<BaseTarget> targets;
+    private List<Obstacle> obstacles;
 
     private void Awake()
     {
-        bambooAcedemy = Academy.Instance;
+        bambooAcademy = Academy.Instance;
         Academy.Instance.OnEnvironmentReset += EnvironmentReset;
     }
 
     void Start()
     {
-        //isFirstRun = true;
-        //boundaryLimits = GetBoundaryLimits();
         agent = gameObject.GetComponentInChildren<AnimalAgent>();
-        target = gameObject.GetComponentInChildren<FoodTarget>();
-        //goal = gameObject.GetComponentInChildren<BaseGoal>();
-
-        //agent.BoundaryLimits = boundaryLimits;
-        //targets.ForEach(t => t.BoundaryLimits = boundaryLimits);
-        //goal.goalLimits = GetGoalLimits();
-        //runningRewardTotals = new Queue<float>(3);
+        agent.EpisodeReset += EnvironmentReset;
+        targets = gameObject.GetComponentsInChildren<BaseTarget>().ToList();
+        obstacles = gameObject.GetComponentsInChildren<Obstacle>().ToList();
     }
 
-    private void FixedUpdate()
+    public void EnvironmentReset()
     {
-        agent.RequestDecision();
-        
-        //if (agent.IsDoneJob)
-        //{
-        //    SetAgentTarget();
-        //}
+        targets.ForEach(t => t.Reset());
+        obstacles.ForEach(o => o.Reset());
     }
 
-    private void EnvironmentReset()
+    public void EnvironmentReset(object sender, EventArgs e)
     {
-        target.Reset();
+        EnvironmentReset();
     }
 }

@@ -1,17 +1,17 @@
 default:
     trainer: ppo
-    batch_size: 256
+    batch_size: 512
     beta: 0.001
-    buffer_size: 5120
-    epsilon: 0.28
+    buffer_size: 1024
+    epsilon: 0.29
     hidden_units: 32
-    lambd: 0.98
+    lambd: 0.99
     learning_rate: 0.005
     learning_rate_schedule: constant
-    max_steps: 5.0e5
+    max_steps: 2e6
     normalize: true
-    num_epoch: 4
-    num_layers: 1
+    num_epoch: 2
+    num_layers: 2
     time_horizon: 1024
     summary_freq: 5000
     
@@ -20,7 +20,7 @@ default:
     sequence_length: 64
     memory_size: 16
     
-    vis_encode_type: nature_cnn
+    vis_encode_type: simple
     reward_signals:
         extrinsic:
             strength: 1.0
@@ -30,9 +30,9 @@ default:
         #    gamma: 0.8
         #    encoding_size: 64
         gail:
-            strength: 0.1
+            strength: 0.075
             gamma: 0.99
-            demo_path: C:\Users\joshu\Documents\GitHub\AnimalSimulation\Assets\Demonstrations\AnimalDemo.demo
+            demo_path: C:\Users\joshu\Documents\GitHub\AnimalSimulation\Demonstrations\RabbitDemo.demo
             
 #SAC 
 # default:

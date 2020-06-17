@@ -1,4 +1,7 @@
-﻿using Unity.MLAgents;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 
@@ -9,13 +12,20 @@ public class AnimalAgent : Agent
     private bool isKilled;
     private Rigidbody rBody;
     private float initialEnergy;
-    
+    private bool raycastHit;
+    private Vector3 previousPosition;
+    private Animator animator;
+    private int layerMask;
+    private BambooAcademy academy;
+
+    public event EventHandler EpisodeReset;
     public float speed;
+    public float acceleration;
     public float energy;
 
     // target data
-    private bool hitTarget;
-    public BaseTarget Target;
+    private BaseTarget activeTarget;
+    public List<BaseTarget> targets;
 
     // enemy
     [SerializeField] Enemy enemy;
@@ -23,18 +33,48 @@ public class AnimalAgent : Agent
     void Start()
     {
         rBody = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
         maxVelocity = new Vector3(speed, 0f, speed);
         hitBoundary = false;
-        hitTarget = false;
         initialEnergy = energy;
+        layerMask = 0 << 8;
+        layerMask = ~layerMask;
     }
 
     void FixedUpdate()
     {
+        // check if agent died or hit a boundary and reset episode
         if (hitBoundary || isKilled)
         {
+            animator.SetInteger("AnimIndex", 2);
+            animator.SetTrigger("Next");
             EndEpisode();
         }
+
+        // if agent is at target, consume it
+        if (activeTarget is IConsumable cons)
+        {
+            if (!cons.IsConsumed)
+            {
+                bool isConsumed = cons.Consume(1f);
+
+                energy += 10;
+                AddReward(0.01f);
+                Debug.Log($"Current Reward: {GetCumulativeReward()}");
+
+                if (energy > initialEnergy)
+                {
+                    energy = initialEnergy;
+                }
+
+                if (isConsumed && targets.Cast<FoodTarget>().All(t => t.IsConsumed))
+                {
+                    EndEpisode();
+                }
+            }
+        }
+
+        VerifyRaycast();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -50,7 +90,7 @@ public class AnimalAgent : Agent
                 }
                 break;
             case "food":
-                hitTarget = true;
+                activeTarget = other.gameObject.GetComponent<BaseTarget>();
                 break;
             case "enemy":
                 if (!isKilled)
@@ -67,7 +107,7 @@ public class AnimalAgent : Agent
     {
         if (other.gameObject.CompareTag("food"))
         {
-            hitTarget = false;
+            activeTarget = null;
         }
     }
 
@@ -83,27 +123,31 @@ public class AnimalAgent : Agent
             enemy.Reset();
             isKilled = false;
         }
-
-        Target.Reset();        
+        
         hitBoundary = false;
-        hitTarget = false;
+        activeTarget = null;
+        OnEpisodeReset();
+    }
+
+    private void OnEpisodeReset()
+    {
+        EpisodeReset?.Invoke(this, EventArgs.Empty);
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
         // Target
-        sensor.AddObservation(Target.transform.localPosition); // 3
-        
-        if (Target is IConsumable cons)
-            sensor.AddObservation(cons.IsConsumed);
+        targets.ForEach(t => sensor.AddObservation(t.transform.localPosition)); // 3 * n        
+        targets.Cast<FoodTarget>().ToList().ForEach(t => sensor.AddObservation(t.IsConsumed)); // 3
 
         // agent
         sensor.AddObservation(transform.localPosition); // 3
         sensor.AddObservation(rBody.velocity.x); // 1
         sensor.AddObservation(rBody.velocity.z); // 1
+        sensor.AddObservation(raycastHit); // 1
 
         // Energy
-        sensor.AddObservation(energy);
+        sensor.AddObservation(energy); // 1
 
         // enemy
         sensor.AddObservation(enemy.Location); // 3
@@ -133,31 +177,62 @@ public class AnimalAgent : Agent
         controlSignal.x = vectorAction[0];
         controlSignal.z = vectorAction[1];
 
-        if (rBody.velocity.magnitude < maxVelocity.magnitude)
+        // agent is idle
+        if (controlSignal.x == 0 && controlSignal.z == 0)
         {
-            rBody.velocity += controlSignal * speed;
+            rBody.angularVelocity = Vector3.zero;
+            rBody.velocity = Vector3.zero;
+            animator.SetInteger("AnimIndex", 0);
+            animator.SetTrigger("Next");
         }
-
-        if (hitTarget)
-        {
-            if (Target is IConsumable cons)
+        else // agent is moving
+        {            
+            if (rBody.velocity.magnitude > speed)
             {
-                bool isConsumed = cons.Consume(0.1f);
-
-                energy += 3;
-                AddReward(0.01f);
-
-                if (energy > initialEnergy)
-                {
-                    energy = initialEnergy;
-                }
-
-                if (isConsumed)
-                {
-                    Debug.Log($"Current Reward: {GetCumulativeReward()}");
-                    EndEpisode();
-                }
+                controlSignal.x = 0;
+                controlSignal.z = 0;
             }
+
+            rBody.velocity += new Vector3(controlSignal.x * acceleration, 0, controlSignal.z * acceleration);
+            SetDirection();
+        }
+    }
+
+    private void SetDirection()
+    {
+        if (transform.position != previousPosition)
+        {
+            var direction = (transform.position - previousPosition).normalized;
+            direction.y = 0;
+
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 0.15F);
+            //transform.rotation = Quaternion.LookRotation(direction);
+            previousPosition = transform.position;
+
+            if (animator.GetInteger("AnimIndex") != 1)
+            {
+                animator.SetInteger("AnimIndex", 1);
+                animator.SetTrigger("Next");
+            }
+        }
+    }
+
+    private void VerifyRaycast()
+    {
+        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit, 50f, layerMask))
+        {
+            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red);
+
+            if (hit.collider.CompareTag("obstacle"))
+            {
+                raycastHit = true;
+            }
+        }
+        else
+        {
+            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 50f, Color.white);
+
+            raycastHit = false;
         }
     }
 
