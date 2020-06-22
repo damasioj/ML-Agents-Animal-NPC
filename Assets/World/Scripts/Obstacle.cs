@@ -1,16 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Obstacle : MonoBehaviour
 {
-    public float maxX, minX, maxZ, minZ;
+    public float range;
+    private float yPos;
+
+    private void Start()
+    {
+        yPos = transform.localPosition.y;
+    }
 
     public void Reset()
     {
-        float x = Random.Range(minX, maxX);
-        float z = Random.Range(minZ, maxZ);
-
-        transform.position = new Vector3(x, transform.position.y, z);
+        transform.localPosition = new Vector3(Random.Range(-1f, 1f) * range, yPos, Random.Range(-1f, 1f) * range);
     }
 }

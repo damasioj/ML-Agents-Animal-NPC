@@ -8,40 +8,26 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float speedMultiplier;
     private Rigidbody rBody;
 
-    public Vector3 Location
-    {
-        get
-        {
-            return transform.localPosition;
-        }
-        private set
-        {
-            transform.localPosition = value;
-        }
-    }
-
     public Vector3 Velocity => rBody.velocity;
     
     // Start is called before the first frame update
     void Start()
     {
         rBody = GetComponent<Rigidbody>();
-        Location = new Vector3(Random.Range(-1f, 1f) * range,
-                                Location.y,
-                                Random.Range(-1f, 1f) * range);
+        Reset();
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         UpdateLocation();
     }
 
     public void Reset()
     {
-        Location = new Vector3(Random.Range(-1f, 1f) * range,
-                                Location.y,
-                                Random.Range(-1f, 1f) * range);
+        transform.localPosition = new Vector3(Random.Range(-1f, 1f) * range,
+                                            transform.localPosition.y,
+                                            Random.Range(-1f, 1f) * range);
         rBody.velocity = Vector3.zero;
         rBody.angularVelocity = Vector3.zero;
     }
@@ -50,7 +36,7 @@ public class Enemy : MonoBehaviour
     {
         float x, z;
 
-        if (agent.transform.localPosition.x > Location.x)
+        if (agent.transform.localPosition.x > transform.localPosition.x)
         {
             x = speedMultiplier;
         }
@@ -59,7 +45,7 @@ public class Enemy : MonoBehaviour
             x = -speedMultiplier;
         }
 
-        if (agent.transform.localPosition.z > Location.z)
+        if (agent.transform.localPosition.z > transform.localPosition.z)
         {
             z = speedMultiplier;
         }
@@ -78,7 +64,7 @@ public class Enemy : MonoBehaviour
         
         if (x != 0 && z != 0)
         {
-            rBody.AddForce(new Vector3(x, 0, z));
+            rBody.velocity += new Vector3(x, 0, z);
         }
     }
 }

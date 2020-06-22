@@ -7,7 +7,6 @@ using UnityEngine;
 
 public class AnimalAgent : Agent
 {
-    private Vector3 maxVelocity;
     private bool hitBoundary;
     private bool isKilled;
     private Rigidbody rBody;
@@ -16,7 +15,8 @@ public class AnimalAgent : Agent
     private Vector3 previousPosition;
     private Animator animator;
     private int layerMask;
-    private BambooAcademy academy;
+    private float y;
+    private bool isDoneCalled;
 
     public event EventHandler EpisodeReset;
     public float speed;
@@ -32,44 +32,51 @@ public class AnimalAgent : Agent
 
     void Start()
     {
+        raycastHit = false;
+        isDoneCalled = false;
         rBody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
-        maxVelocity = new Vector3(speed, 0f, speed);
         hitBoundary = false;
         initialEnergy = energy;
         layerMask = 0 << 8;
         layerMask = ~layerMask;
+        y = transform.position.y;
     }
 
     void FixedUpdate()
     {
-        // check if agent died or hit a boundary and reset episode
-        if (hitBoundary || isKilled)
+        if (!isDoneCalled)
         {
-            animator.SetInteger("AnimIndex", 2);
-            animator.SetTrigger("Next");
-            EndEpisode();
-        }
-
-        // if agent is at target, consume it
-        if (activeTarget is IConsumable cons)
-        {
-            if (!cons.IsConsumed)
+            // check if agent died or hit a boundary and reset episode
+            if (isKilled)
             {
-                bool isConsumed = cons.Consume(1f);
+                isDoneCalled = true;
+                animator.SetInteger("AnimIndex", 2);
+                animator.SetTrigger("Next");
+                EndEpisode();
+            }
 
-                energy += 10;
-                AddReward(0.01f);
-                Debug.Log($"Current Reward: {GetCumulativeReward()}");
-
-                if (energy > initialEnergy)
+            // if agent is at target, consume it
+            if (activeTarget is IConsumable cons)
+            {
+                if (!cons.IsConsumed)
                 {
-                    energy = initialEnergy;
-                }
+                    bool isConsumed = cons.Consume(1f);
 
-                if (isConsumed && targets.Cast<FoodTarget>().All(t => t.IsConsumed))
-                {
-                    EndEpisode();
+                    energy += 10;
+                    AddReward(0.01f);
+                    Debug.Log($"Current Reward: {GetCumulativeReward()}");
+
+                    if (energy > initialEnergy)
+                    {
+                        energy = initialEnergy;
+                    }
+
+                    if (isConsumed && targets.Cast<FoodTarget>().All(t => t.IsConsumed))
+                    {
+                        isDoneCalled = true;
+                        EndEpisode();
+                    }
                 }
             }
         }
@@ -82,11 +89,13 @@ public class AnimalAgent : Agent
         switch (other.tag)
         {
             case "wall":
-                if (!hitBoundary)
+                if (!hitBoundary && !isDoneCalled)
                 {
+                    isDoneCalled = true;
                     hitBoundary = true;
                     SubtractReward(0.1f);
                     Debug.Log($"Current Reward: {GetCumulativeReward()}");
+                    EndEpisode();
                 }
                 break;
             case "food":
@@ -113,20 +122,23 @@ public class AnimalAgent : Agent
 
     public override void OnEpisodeBegin()
     {
+        OnEpisodeReset();
+
         // reset agent
         if (hitBoundary || energy <= 0 || isKilled)
         {
             rBody.angularVelocity = Vector3.zero;
             rBody.velocity = Vector3.zero;
-            transform.localPosition = new Vector3(0, transform.localPosition.y, 0);
+            transform.position = new Vector3(0, y, 0);
             energy = initialEnergy;
             enemy.Reset();
             isKilled = false;
         }
-        
+
         hitBoundary = false;
         activeTarget = null;
-        OnEpisodeReset();
+        isDoneCalled = false;
+        raycastHit = false;
     }
 
     private void OnEpisodeReset()
@@ -136,29 +148,30 @@ public class AnimalAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // Target
-        targets.ForEach(t => sensor.AddObservation(t.transform.localPosition)); // 3 * n        
+        // target
+        targets.ForEach(t => sensor.AddObservation(t.transform.position)); // 3 * n
         targets.Cast<FoodTarget>().ToList().ForEach(t => sensor.AddObservation(t.IsConsumed)); // 3
+        targets.Cast<FoodTarget>().ToList().ForEach(t => sensor.AddObservation(t.hp)); // n * 1
+        sensor.AddObservation(activeTarget is object); // 1
 
         // agent
-        sensor.AddObservation(transform.localPosition); // 3
+        sensor.AddObservation(transform.position); // 3
         sensor.AddObservation(rBody.velocity.x); // 1
         sensor.AddObservation(rBody.velocity.z); // 1
         sensor.AddObservation(raycastHit); // 1
-
-        // Energy
         sensor.AddObservation(energy); // 1
 
         // enemy
-        sensor.AddObservation(enemy.Location); // 3
+        sensor.AddObservation(enemy.transform.position); // 3
         sensor.AddObservation(enemy.Velocity); // 3
-     }
+    }
 
     public override void OnActionReceived(float[] vectorAction)
     {
         // Animal died
-        if (energy <= 0)
+        if (energy <= 0 && !isDoneCalled)
         {
+            isDoneCalled = true;
             SubtractReward(0.1f);
             Debug.Log($"Current Reward: {GetCumulativeReward()}");
             EndEpisode();
@@ -173,27 +186,28 @@ public class AnimalAgent : Agent
     private void Move(float[] vectorAction)
     {
         // Move Actions, size = 2
-        Vector3 controlSignal = Vector3.zero;
-        controlSignal.x = vectorAction[0];
-        controlSignal.z = vectorAction[1];
+        Vector3 controlSignal = new Vector3(vectorAction[0] * acceleration, 0, vectorAction[1] * acceleration);
 
         // agent is idle
         if (controlSignal.x == 0 && controlSignal.z == 0)
         {
             rBody.angularVelocity = Vector3.zero;
             rBody.velocity = Vector3.zero;
-            animator.SetInteger("AnimIndex", 0);
-            animator.SetTrigger("Next");
+            if (animator.GetInteger("AnimIndex") != 0)
+            {
+                animator.SetInteger("AnimIndex", 0);
+                animator.SetTrigger("Next");
+            }
         }
         else // agent is moving
-        {            
+        {
             if (rBody.velocity.magnitude > speed)
             {
                 controlSignal.x = 0;
                 controlSignal.z = 0;
             }
 
-            rBody.velocity += new Vector3(controlSignal.x * acceleration, 0, controlSignal.z * acceleration);
+            rBody.velocity += controlSignal;
             SetDirection();
         }
     }
@@ -206,7 +220,6 @@ public class AnimalAgent : Agent
             direction.y = 0;
 
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 0.15F);
-            //transform.rotation = Quaternion.LookRotation(direction);
             previousPosition = transform.position;
 
             if (animator.GetInteger("AnimIndex") != 1)
@@ -240,7 +253,6 @@ public class AnimalAgent : Agent
     {
         actions[0] = Input.GetAxis("Horizontal");
         actions[1] = Input.GetAxis("Vertical");
-        //action[2] = Input.GetKey(KeyCode.E) ? 1.0f : 0.0f;
     }
 
     private void SubtractReward(float value)

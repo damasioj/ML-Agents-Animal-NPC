@@ -131,7 +131,7 @@ Rigidbody:
   m_Mass: 1
   m_Drag: 5
   m_AngularDrag: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
@@ -147,8 +147,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 0.85071945, z: 1}
-  m_Center: {x: 0, y: 0.36101836, z: 0}
+  m_Size: {x: 1, y: 0.7675856, z: 1}
+  m_Center: {x: 0, y: 0.40258533, z: 0}
 --- !u!114 &1953516760485064244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 25
+    VectorObservationSize: 5
     NumStackedVectorObservations: 1
     VectorActionSize: 02000000
     VectorActionDescriptions: []
@@ -189,9 +189,9 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  speed: 300
-  acceleration: 100
-  energy: 1000
+  speed: 30
+  acceleration: 10
+  energy: 750
   targets: []
   enemy: {fileID: 0}
 --- !u!114 &4009429242978375721
