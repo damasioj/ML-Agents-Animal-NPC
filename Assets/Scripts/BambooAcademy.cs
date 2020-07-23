@@ -21,6 +21,7 @@ public class BambooAcademy : MonoBehaviour
     {
         agent = gameObject.GetComponentInChildren<AnimalAgent>();
         agent.EpisodeReset += EnvironmentReset;
+        agent.TaskDone += UpdateTask;
         targets = gameObject.GetComponentsInChildren<BaseTarget>().ToList();
         obstacles = gameObject.GetComponentsInChildren<Obstacle>().ToList();
     }
@@ -29,10 +30,19 @@ public class BambooAcademy : MonoBehaviour
     {
         targets.ForEach(t => t.Reset());
         obstacles.ForEach(o => o.Reset());
+        agent.UpdateTarget(targets);
     }
 
     public void EnvironmentReset(object sender, EventArgs e)
     {
         EnvironmentReset();
+    }
+
+    public void UpdateTask(object sender, EventArgs e)
+    {
+        if (sender is AnimalAgent animalAgent)
+        {
+            animalAgent.UpdateTarget(targets);
+        }
     }
 }

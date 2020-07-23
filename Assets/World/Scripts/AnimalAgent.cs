@@ -19,13 +19,14 @@ public class AnimalAgent : Agent
     private bool isDoneCalled;
 
     public event EventHandler EpisodeReset;
+    public event EventHandler TaskDone;
     public float speed;
     public float acceleration;
     public float energy;
 
     // target data
-    private BaseTarget activeTarget;
-    public List<BaseTarget> targets;
+    private bool isAtTarget;
+    private FoodTarget target;
 
     // enemy
     [SerializeField] Enemy enemy;
@@ -57,7 +58,7 @@ public class AnimalAgent : Agent
             }
 
             // if agent is at target, consume it
-            if (activeTarget is IConsumable cons)
+            if (isAtTarget && target is IConsumable cons)
             {
                 if (!cons.IsConsumed)
                 {
@@ -72,10 +73,10 @@ public class AnimalAgent : Agent
                         energy = initialEnergy;
                     }
 
-                    if (isConsumed && targets.Cast<FoodTarget>().All(t => t.IsConsumed))
+                    if (isConsumed)
                     {
-                        isDoneCalled = true;
-                        EndEpisode();
+                        isAtTarget = false;
+                        OnTaskDone();
                     }
                 }
             }
@@ -99,7 +100,10 @@ public class AnimalAgent : Agent
                 }
                 break;
             case "food":
-                activeTarget = other.gameObject.GetComponent<BaseTarget>();
+                if (other.gameObject.Equals(target.gameObject))
+                {
+                    isAtTarget = true;
+                }
                 break;
             case "enemy":
                 if (!isKilled)
@@ -116,8 +120,13 @@ public class AnimalAgent : Agent
     {
         if (other.gameObject.CompareTag("food"))
         {
-            activeTarget = null;
+            isAtTarget = false;
         }
+    }
+
+    private void OnTaskDone()
+    {
+        TaskDone?.Invoke(this, EventArgs.Empty);
     }
 
     public override void OnEpisodeBegin()
@@ -136,7 +145,7 @@ public class AnimalAgent : Agent
         }
 
         hitBoundary = false;
-        activeTarget = null;
+        isAtTarget = false;
         isDoneCalled = false;
         raycastHit = false;
     }
@@ -148,22 +157,26 @@ public class AnimalAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // target
-        targets.ForEach(t => sensor.AddObservation(t.transform.position)); // 3 * n
-        targets.Cast<FoodTarget>().ToList().ForEach(t => sensor.AddObservation(t.IsConsumed)); // 3
-        targets.Cast<FoodTarget>().ToList().ForEach(t => sensor.AddObservation(t.hp)); // n * 1
-        sensor.AddObservation(activeTarget is object); // 1
+        if (!isDoneCalled)
+        {
+            // target
+            sensor.AddObservation(target.transform.position); // 3
+            sensor.AddObservation(isAtTarget); // 1
+            sensor.AddObservation(target.hp); // 1
 
-        // agent
-        sensor.AddObservation(transform.position); // 3
-        sensor.AddObservation(rBody.velocity.x); // 1
-        sensor.AddObservation(rBody.velocity.z); // 1
-        sensor.AddObservation(raycastHit); // 1
-        sensor.AddObservation(energy); // 1
+            // agent
+            sensor.AddObservation(transform.position.x); // 1
+            sensor.AddObservation(transform.position.z); // 1
+            sensor.AddObservation(rBody.velocity.x); // 1
+            sensor.AddObservation(rBody.velocity.z); // 1
+            sensor.AddObservation(raycastHit); // 1
+            sensor.AddObservation(energy); // 1
 
-        // enemy
-        sensor.AddObservation(enemy.transform.position); // 3
-        sensor.AddObservation(enemy.Velocity); // 3
+            // enemy
+            sensor.AddObservation(enemy.transform.position.x); // 1
+            sensor.AddObservation(enemy.transform.position.z); // 1
+            sensor.AddObservation(enemy.Velocity); // 3
+        }
     }
 
     public override void OnActionReceived(float[] vectorAction)
@@ -246,6 +259,22 @@ public class AnimalAgent : Agent
             Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 50f, Color.white);
 
             raycastHit = false;
+        }
+    }
+
+    /// <summary>
+    /// Allows the agent to reset their current target.
+    /// The logic for the next target is purposefully left for the agent; the environment only provides data.
+    /// </summary>
+    /// <param name="targets"></param>
+    public void UpdateTarget(IEnumerable<BaseTarget> targets)
+    {
+        target = targets.FirstOrDefault(t => t.IsValid && t is FoodTarget) as FoodTarget;
+
+        if (target is null)
+        {
+            isDoneCalled = true;
+            EndEpisode();
         }
     }
 

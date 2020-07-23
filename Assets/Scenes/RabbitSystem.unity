@@ -585,12 +585,17 @@ PrefabInstance:
     - target: {fileID: 1953516760485064244, guid: 9f33aefe868898243bb50b113141d15f,
         type: 3}
       propertyPath: m_BrainParameters.VectorObservationSize
-      value: 29
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 1953516760485064244, guid: 9f33aefe868898243bb50b113141d15f,
         type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4009429242978375721, guid: 9f33aefe868898243bb50b113141d15f,
+        type: 3}
+      propertyPath: DecisionPeriod
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9f33aefe868898243bb50b113141d15f, type: 3}

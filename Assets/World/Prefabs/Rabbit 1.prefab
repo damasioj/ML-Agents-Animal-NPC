@@ -191,8 +191,7 @@ MonoBehaviour:
   MaxStep: 0
   speed: 30
   acceleration: 10
-  energy: 750
-  targets: []
+  energy: 1250
   enemy: {fileID: 0}
 --- !u!114 &4009429242978375721
 MonoBehaviour:
