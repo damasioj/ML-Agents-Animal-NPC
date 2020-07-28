@@ -3,17 +3,17 @@ default:
     batch_size: 512
     num_update: 10
     beta: 1e-03
-    buffer_size: 10240
+    buffer_size: 20480
     train_interval: 30
-    epsilon: 0.2
+    epsilon: 0.25
     hidden_units: 32
-    lambd: 0.95
-    learning_rate: 0.0025
+    lambd: 0.97
+    learning_rate: 0.0015
     learning_rate_schedule: constant
     max_steps: 15e6
     memory_size: 32
     normalize: true
-    num_epoch: 3
+    num_epoch: 2
     num_layers: 1
     time_horizon: 1024
     sequence_length: 24

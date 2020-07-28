@@ -567,6 +567,11 @@ PrefabInstance:
       propertyPath: targets.Array.data[2]
       value: 
       objectReference: {fileID: 438710839}
+    - target: {fileID: 8306591479770939179, guid: 9f33aefe868898243bb50b113141d15f,
+        type: 3}
+      propertyPath: maxSpeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1679741302368073525, guid: 9f33aefe868898243bb50b113141d15f,
         type: 3}
       propertyPath: Record
@@ -591,11 +596,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4009429242978375721, guid: 9f33aefe868898243bb50b113141d15f,
-        type: 3}
-      propertyPath: DecisionPeriod
-      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9f33aefe868898243bb50b113141d15f, type: 3}

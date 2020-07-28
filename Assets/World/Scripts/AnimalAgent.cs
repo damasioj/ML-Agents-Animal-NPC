@@ -20,7 +20,6 @@ public class AnimalAgent : Agent
 
     public event EventHandler EpisodeReset;
     public event EventHandler TaskDone;
-    public float speed;
     public float acceleration;
     public float energy;
 
@@ -198,8 +197,9 @@ public class AnimalAgent : Agent
 
     private void Move(float[] vectorAction)
     {
-        // Move Actions, size = 2
-        Vector3 controlSignal = new Vector3(vectorAction[0] * acceleration, 0, vectorAction[1] * acceleration);
+        Vector3 controlSignal = Vector3.zero;
+        controlSignal.x = vectorAction[0];
+        controlSignal.z = vectorAction[1];
 
         // agent is idle
         if (controlSignal.x == 0 && controlSignal.z == 0)
@@ -214,13 +214,14 @@ public class AnimalAgent : Agent
         }
         else // agent is moving
         {
-            if (rBody.velocity.magnitude > speed)
+            var rBody = GetComponent<Rigidbody>();
+            var scale = gameObject.transform.localScale.x;
+
+            if (rBody is object)
             {
-                controlSignal.x = 0;
-                controlSignal.z = 0;
+                rBody.AddForce(new Vector3(controlSignal.x * acceleration * scale, 0, controlSignal.z * acceleration * scale));
             }
 
-            rBody.velocity += controlSignal;
             SetDirection();
         }
     }
