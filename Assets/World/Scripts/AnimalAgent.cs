@@ -17,6 +17,7 @@ public class AnimalAgent : Agent
     private int layerMask;
     private float y;
     private bool isDoneCalled;
+    private bool startedConsumption;
 
     public event EventHandler EpisodeReset;
     public event EventHandler TaskDone;
@@ -41,6 +42,7 @@ public class AnimalAgent : Agent
         layerMask = 0 << 8;
         layerMask = ~layerMask;
         y = transform.position.y;
+        startedConsumption = false;
     }
 
     void FixedUpdate()
@@ -61,11 +63,16 @@ public class AnimalAgent : Agent
             {
                 if (!cons.IsConsumed)
                 {
+                    if (!startedConsumption)
+                    {
+                        AddReward(0.75f);
+                        startedConsumption = true;
+                        Debug.Log($"Current Reward: {GetCumulativeReward()}");
+                    }
+
                     bool isConsumed = cons.Consume(1f);
 
                     energy += 10;
-                    AddReward(0.01f);
-                    Debug.Log($"Current Reward: {GetCumulativeReward()}");
 
                     if (energy > initialEnergy)
                     {
@@ -74,6 +81,7 @@ public class AnimalAgent : Agent
 
                     if (isConsumed)
                     {
+                        AddReward(0.75f);
                         isAtTarget = false;
                         OnTaskDone();
                     }
@@ -158,10 +166,19 @@ public class AnimalAgent : Agent
     {
         if (!isDoneCalled)
         {
-            // target
-            sensor.AddObservation(target.transform.position); // 3
-            sensor.AddObservation(isAtTarget); // 1
-            sensor.AddObservation(target.hp); // 1
+            if (target is object)
+            {
+                // target
+                sensor.AddObservation(target.transform.position); // 3
+                sensor.AddObservation(isAtTarget); // 1
+                sensor.AddObservation(target.hp); // 1
+            }
+            else
+            {
+                sensor.AddObservation(Vector3.zero);
+                sensor.AddObservation(false);
+                sensor.AddObservation(0f);
+            }
 
             // agent
             sensor.AddObservation(transform.position.x); // 1
@@ -277,6 +294,8 @@ public class AnimalAgent : Agent
             isDoneCalled = true;
             EndEpisode();
         }
+
+        startedConsumption = false;
     }
 
     public override void Heuristic(float[] actions)

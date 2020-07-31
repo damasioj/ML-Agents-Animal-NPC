@@ -2,7 +2,6 @@
 
 public abstract class BaseTarget : MonoBehaviour
 {
-    public float x, y, z;
     public bool TargetHit { get; protected set; }
     public abstract bool IsValid { get; }
     
