@@ -190,7 +190,8 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   acceleration: 50
-  energy: 1250
+  minEnergy: 700
+  maxEnergy: 3000
   enemy: {fileID: 0}
 --- !u!114 &4009429242978375721
 MonoBehaviour:

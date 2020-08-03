@@ -287,7 +287,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthRange: 100
-  range: 250
+  positionRange: 150
+  minScale: 0.3
+  maxScale: 5
   hp: 0
 --- !u!136 &957657303583883901
 CapsuleCollider:

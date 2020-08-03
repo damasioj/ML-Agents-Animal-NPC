@@ -10,7 +10,6 @@ public class AnimalAgent : Agent
     private bool hitBoundary;
     private bool isKilled;
     private Rigidbody rBody;
-    private float initialEnergy;
     private bool raycastHit;
     private Vector3 previousPosition;
     private Animator animator;
@@ -18,11 +17,13 @@ public class AnimalAgent : Agent
     private float y;
     private bool isDoneCalled;
     private bool startedConsumption;
+    private float currentEnergy;
 
     public event EventHandler EpisodeReset;
     public event EventHandler TaskDone;
     public float acceleration;
-    public float energy;
+    public float minEnergy;
+    public float maxEnergy;
 
     // target data
     private bool isAtTarget;
@@ -38,7 +39,6 @@ public class AnimalAgent : Agent
         rBody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         hitBoundary = false;
-        initialEnergy = energy;
         layerMask = 0 << 8;
         layerMask = ~layerMask;
         y = transform.position.y;
@@ -72,11 +72,11 @@ public class AnimalAgent : Agent
 
                     bool isConsumed = cons.Consume(1f);
 
-                    energy += 10;
+                    currentEnergy += 10;
 
-                    if (energy > initialEnergy)
+                    if (currentEnergy > maxEnergy)
                     {
-                        energy = initialEnergy;
+                        currentEnergy = maxEnergy;
                     }
 
                     if (isConsumed)
@@ -141,12 +141,12 @@ public class AnimalAgent : Agent
         OnEpisodeReset();
 
         // reset agent
-        if (hitBoundary || energy <= 0 || isKilled)
+        if (hitBoundary || currentEnergy <= 0 || isKilled)
         {
             rBody.angularVelocity = Vector3.zero;
             rBody.velocity = Vector3.zero;
             transform.position = new Vector3(0, y, 0);
-            energy = initialEnergy;
+            currentEnergy = UnityEngine.Random.Range(minEnergy, maxEnergy);
             enemy.Reset();
             isKilled = false;
         }
@@ -155,6 +155,7 @@ public class AnimalAgent : Agent
         isAtTarget = false;
         isDoneCalled = false;
         raycastHit = false;
+        startedConsumption = false;
     }
 
     private void OnEpisodeReset()
@@ -186,7 +187,7 @@ public class AnimalAgent : Agent
             sensor.AddObservation(rBody.velocity.x); // 1
             sensor.AddObservation(rBody.velocity.z); // 1
             sensor.AddObservation(raycastHit); // 1
-            sensor.AddObservation(energy); // 1
+            sensor.AddObservation(currentEnergy); // 1
 
             // enemy
             sensor.AddObservation(enemy.transform.position.x); // 1
@@ -198,7 +199,7 @@ public class AnimalAgent : Agent
     public override void OnActionReceived(float[] vectorAction)
     {
         // Animal died
-        if (energy <= 0 && !isDoneCalled)
+        if (currentEnergy <= 0 && !isDoneCalled)
         {
             isDoneCalled = true;
             SubtractReward(0.1f);
@@ -209,7 +210,7 @@ public class AnimalAgent : Agent
         // Move
         Move(vectorAction);
 
-        energy--;
+        currentEnergy--;
     }
 
     private void Move(float[] vectorAction)
