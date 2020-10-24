@@ -286,7 +286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a24b72058a3a1946b32596ec5e89d2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthRange: 100
+  healthRange: 500
   positionRange: 150
   minScale: 0.3
   maxScale: 5

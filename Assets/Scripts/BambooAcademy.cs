@@ -6,14 +6,12 @@ using UnityEngine;
 
 public class BambooAcademy : MonoBehaviour
 {
-    private Academy bambooAcademy;
     private AnimalAgent agent;
     private List<BaseTarget> targets;
     private List<Obstacle> obstacles;
 
     private void Awake()
     {
-        bambooAcademy = Academy.Instance;
         Academy.Instance.OnEnvironmentReset += EnvironmentReset;
     }
 

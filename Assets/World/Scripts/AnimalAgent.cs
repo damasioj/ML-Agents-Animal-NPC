@@ -10,10 +10,8 @@ public class AnimalAgent : Agent
     private bool hitBoundary;
     private bool isKilled;
     private Rigidbody rBody;
-    private bool raycastHit;
     private Vector3 previousPosition;
     private Animator animator;
-    private int layerMask;
     private float y;
     private bool isDoneCalled;
     private bool startedConsumption;
@@ -28,19 +26,17 @@ public class AnimalAgent : Agent
     // target data
     private bool isAtTarget;
     private FoodTarget target;
+    private readonly object targetLock = new object();
 
     // enemy
     [SerializeField] Enemy enemy;
 
     void Start()
     {
-        raycastHit = false;
         isDoneCalled = false;
         rBody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         hitBoundary = false;
-        layerMask = 0 << 8;
-        layerMask = ~layerMask;
         y = transform.position.y;
         startedConsumption = false;
     }
@@ -57,39 +53,7 @@ public class AnimalAgent : Agent
                 animator.SetTrigger("Next");
                 EndEpisode();
             }
-
-            // if agent is at target, consume it
-            if (isAtTarget && target is IConsumable cons)
-            {
-                if (!cons.IsConsumed)
-                {
-                    if (!startedConsumption)
-                    {
-                        AddReward(0.75f);
-                        startedConsumption = true;
-                        Debug.Log($"Current Reward: {GetCumulativeReward()}");
-                    }
-
-                    bool isConsumed = cons.Consume(1f);
-
-                    currentEnergy += 10;
-
-                    if (currentEnergy > maxEnergy)
-                    {
-                        currentEnergy = maxEnergy;
-                    }
-
-                    if (isConsumed)
-                    {
-                        AddReward(0.75f);
-                        isAtTarget = false;
-                        OnTaskDone();
-                    }
-                }
-            }
         }
-
-        VerifyRaycast();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -138,24 +102,26 @@ public class AnimalAgent : Agent
 
     public override void OnEpisodeBegin()
     {
-        OnEpisodeReset();
-
-        // reset agent
-        if (hitBoundary || currentEnergy <= 0 || isKilled)
+        lock (targetLock)
         {
-            rBody.angularVelocity = Vector3.zero;
-            rBody.velocity = Vector3.zero;
-            transform.position = new Vector3(0, y, 0);
-            currentEnergy = UnityEngine.Random.Range(minEnergy, maxEnergy);
-            enemy.Reset();
-            isKilled = false;
-        }
+            OnEpisodeReset();
 
-        hitBoundary = false;
-        isAtTarget = false;
-        isDoneCalled = false;
-        raycastHit = false;
-        startedConsumption = false;
+            // reset agent
+            if (hitBoundary || currentEnergy <= 0 || isKilled)
+            {
+                rBody.angularVelocity = Vector3.zero;
+                rBody.velocity = Vector3.zero;
+                transform.position = new Vector3(0, y, 0);
+                currentEnergy = UnityEngine.Random.Range(minEnergy, maxEnergy);
+                enemy.Reset();
+                isKilled = false;
+            }
+
+            hitBoundary = false;
+            isAtTarget = false;
+            isDoneCalled = false;
+            startedConsumption = false;
+        }
     }
 
     private void OnEpisodeReset()
@@ -165,7 +131,7 @@ public class AnimalAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        if (!isDoneCalled)
+        lock (targetLock)
         {
             if (target is object)
             {
@@ -186,7 +152,6 @@ public class AnimalAgent : Agent
             sensor.AddObservation(transform.position.z); // 1
             sensor.AddObservation(rBody.velocity.x); // 1
             sensor.AddObservation(rBody.velocity.z); // 1
-            sensor.AddObservation(raycastHit); // 1
             sensor.AddObservation(currentEnergy); // 1
 
             // enemy
@@ -210,7 +175,48 @@ public class AnimalAgent : Agent
         // Move
         Move(vectorAction);
 
+        // Action (eat)
+        if (Convert.ToBoolean(vectorAction[2]))
+        {
+            TryConsume();
+        }
+
         currentEnergy--;
+    }
+
+    private void TryConsume()
+    {
+        // if agent is at target, consume it
+        if (isAtTarget && target is IConsumable cons)
+        {
+            if (!cons.IsConsumed)
+            {
+                //Debug.Log("Consuming ...");
+                if (!startedConsumption)
+                {
+                    AddReward(0.75f);
+                    startedConsumption = true;
+                    Debug.Log($"Current Reward: {GetCumulativeReward()}");
+                }
+
+                bool isConsumed = cons.Consume(2f);
+
+                currentEnergy += 10;
+
+                if (currentEnergy > maxEnergy)
+                {
+                    currentEnergy = maxEnergy;
+                }
+
+                if (isConsumed)
+                {
+                    AddReward(0.75f);
+                    isAtTarget = false;
+                    OnTaskDone();
+                    //Debug.Log($"Consumed. New energy: {currentEnergy}");
+                }
+            }
+        }
     }
 
     private void Move(float[] vectorAction)
@@ -262,25 +268,6 @@ public class AnimalAgent : Agent
         }
     }
 
-    private void VerifyRaycast()
-    {
-        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit, 50f, layerMask))
-        {
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.red);
-
-            if (hit.collider.CompareTag("obstacle"))
-            {
-                raycastHit = true;
-            }
-        }
-        else
-        {
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 50f, Color.white);
-
-            raycastHit = false;
-        }
-    }
-
     /// <summary>
     /// Allows the agent to reset their current target.
     /// The logic for the next target is purposefully left for the agent; the environment only provides data.
@@ -303,6 +290,7 @@ public class AnimalAgent : Agent
     {
         actions[0] = Input.GetAxis("Horizontal");
         actions[1] = Input.GetAxis("Vertical");
+        actions[2] = Convert.ToSingle(Input.GetKey(KeyCode.E));
     }
 
     private void SubtractReward(float value)

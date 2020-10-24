@@ -27,7 +27,7 @@ public class FoodTarget : BaseTarget, IConsumable
 
     void Start()
     {
-        hp = Random.Range(0f, healthRange);
+        hp = Random.Range(10f, healthRange);
         yPos = new float[] { 6f, -20f }; // just used to randomize Y value
     }
 
