@@ -18,6 +18,10 @@ public class FoodTarget : BaseTarget, IConsumable
     /// The target's maximum acceptable scale. This is used only to reduce bias during training.
     /// </summary>
     [SerializeField] private float maxScale;
+    /// <summary>
+    /// The amount of energy from consuming once.
+    /// </summary>
+    [SerializeField] private float energyValue;
     
     [HideInInspector] public float hp;
     private float[] yPos;
@@ -28,19 +32,17 @@ public class FoodTarget : BaseTarget, IConsumable
     void Start()
     {
         hp = Random.Range(10f, healthRange);
-        yPos = new float[] { 6f, -20f }; // just used to randomize Y value
+        yPos = new float[] { transform.localPosition.y - 5, transform.localPosition.y + 5 }; // just used to randomize Y value
     }
 
-    public bool Consume(float value)
+    public float Consume(int value)
     {
-        hp -= value;
-
-        if (IsConsumed)
+        for (int i = 0; i < value; i++)
         {
-            return true;
+            hp -= value;
         }
 
-        return false;
+        return energyValue;
     }
 
     public override void Reset()

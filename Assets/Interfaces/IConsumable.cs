@@ -7,6 +7,6 @@
     /// </summary>
     /// <param name="value">Value to consume</param>
     /// <returns></returns>
-    bool Consume(float value);
+    float Consume(int value);
     bool IsConsumed { get; }
 }

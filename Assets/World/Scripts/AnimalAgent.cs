@@ -12,7 +12,7 @@ public class AnimalAgent : Agent
     private Rigidbody rBody;
     private Vector3 previousPosition;
     private Animator animator;
-    private float y;
+    private float y; // sometimes the agent bugs and "flies", this is to reset it
     private bool isDoneCalled;
     private bool startedConsumption;
     private float currentEnergy;
@@ -54,6 +54,11 @@ public class AnimalAgent : Agent
                 EndEpisode();
             }
         }
+
+        if (rBody.position.y > y + 5)
+        {
+            rBody.position = new Vector3(rBody.position.x, y, rBody.position.z);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -65,7 +70,7 @@ public class AnimalAgent : Agent
                 {
                     isDoneCalled = true;
                     hitBoundary = true;
-                    SubtractReward(0.1f);
+                    SubtractReward(1f);
                     Debug.Log($"Current Reward: {GetCumulativeReward()}");
                     EndEpisode();
                 }
@@ -80,7 +85,7 @@ public class AnimalAgent : Agent
                 if (!isKilled)
                 {
                     isKilled = true;
-                    SubtractReward(0.2f);
+                    SubtractReward(1f);
                     Debug.Log($"Current Reward: {GetCumulativeReward()}");
                 }
                 break;
@@ -167,7 +172,7 @@ public class AnimalAgent : Agent
         if (currentEnergy <= 0 && !isDoneCalled)
         {
             isDoneCalled = true;
-            SubtractReward(0.1f);
+            SubtractReward(1f);
             Debug.Log($"Current Reward: {GetCumulativeReward()}");
             EndEpisode();
         }
@@ -199,21 +204,20 @@ public class AnimalAgent : Agent
                     Debug.Log($"Current Reward: {GetCumulativeReward()}");
                 }
 
-                bool isConsumed = cons.Consume(2f);
-
-                currentEnergy += 10;
+                float targetEnergy = target.Consume(1);
+                currentEnergy += targetEnergy;
 
                 if (currentEnergy > maxEnergy)
                 {
                     currentEnergy = maxEnergy;
                 }
 
-                if (isConsumed)
+                if (cons.IsConsumed)
                 {
                     AddReward(0.75f);
                     isAtTarget = false;
                     OnTaskDone();
-                    //Debug.Log($"Consumed. New energy: {currentEnergy}");
+                    Debug.Log($"Current Reward: {GetCumulativeReward()}");
                 }
             }
         }
