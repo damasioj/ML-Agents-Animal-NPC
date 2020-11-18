@@ -18,7 +18,7 @@ public class Enemy : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    public void UpdateEnemy()
     {
         UpdateLocation();
     }
@@ -59,9 +59,9 @@ public class Enemy : MonoBehaviour
 
     void Move(float x, float z)
     {
-        x = x > maxSpeed ? 0 : x;
-        z = z > maxSpeed ? 0 : z;
-        
+        x = (rBody.velocity.x > maxSpeed || rBody.velocity.x < maxSpeed * - 1) ? 0 : x;
+        z = (rBody.velocity.z > maxSpeed || rBody.velocity.z < maxSpeed * - 1) ? 0 : z;
+
         if (x != 0 && z != 0)
         {
             rBody.velocity += new Vector3(x, 0, z);

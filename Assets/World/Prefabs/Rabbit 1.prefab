@@ -93,7 +93,7 @@ Transform:
   m_GameObject: {fileID: 2312665461509912621}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -66.63845, y: -15, z: 14.113548}
-  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_LocalScale: {x: 5, y: 5, z: 5}
   m_Children:
   - {fileID: 2311237411443300283}
   - {fileID: 2311098950377632127}
@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 15
+    VectorObservationSize: 14
     NumStackedVectorObservations: 1
     VectorActionSize: 03000000
     VectorActionDescriptions: []
@@ -189,9 +189,9 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  acceleration: 2000
+  acceleration: 1000
   minEnergy: 700
-  maxEnergy: 3000
+  maxEnergy: 1500
   enemy: {fileID: 0}
 --- !u!114 &4009429242978375721
 MonoBehaviour:
@@ -205,7 +205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DecisionPeriod: 1
+  DecisionPeriod: 7
   TakeActionsBetweenDecisions: 1
 --- !u!114 &1679741302368073525
 MonoBehaviour:

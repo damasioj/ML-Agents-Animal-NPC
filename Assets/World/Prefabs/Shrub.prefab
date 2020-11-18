@@ -395,7 +395,7 @@ Transform:
   m_GameObject: {fileID: 5330055343673306279}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -71.43135, y: -47.24623, z: -98.388535}
-  m_LocalScale: {x: 50, y: 50, z: 50}
+  m_LocalScale: {x: 5, y: 5, z: 5}
   m_Children:
   - {fileID: 3346849471312802276}
   - {fileID: 2235768727131441139}
@@ -405,7 +405,7 @@ Transform:
   - {fileID: 5959440838508339187}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 94.145004, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -52.732002, z: 0}
 --- !u!114 &6395297135059968893
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -419,9 +419,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthRange: 100
-  positionRange: 150
+  positionRange: 100
   minScale: 5
-  maxScale: 25
+  maxScale: 20
   energyValue: 10
   hp: 9.350787
 --- !u!135 &2462547982209890187

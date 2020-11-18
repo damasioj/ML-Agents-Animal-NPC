@@ -70,7 +70,8 @@ public class AnimalAgent : Agent
                 {
                     isDoneCalled = true;
                     hitBoundary = true;
-                    SubtractReward(1f);
+                    SubtractReward(0.1f);
+                    Debug.Log($"Hit boundary.");
                     Debug.Log($"Current Reward: {GetCumulativeReward()}");
                     EndEpisode();
                 }
@@ -85,7 +86,8 @@ public class AnimalAgent : Agent
                 if (!isKilled)
                 {
                     isKilled = true;
-                    SubtractReward(1f);
+                    SubtractReward(0.2f);
+                    Debug.Log($"Died.");
                     Debug.Log($"Current Reward: {GetCumulativeReward()}");
                 }
                 break;
@@ -141,13 +143,16 @@ public class AnimalAgent : Agent
             if (target is object)
             {
                 // target
-                sensor.AddObservation(target.transform.position); // 3
+                sensor.AddObservation(target.transform.position.x); // 2
+                sensor.AddObservation(target.transform.position.y);
                 sensor.AddObservation(isAtTarget); // 1
                 sensor.AddObservation(target.hp); // 1
             }
             else
             {
-                sensor.AddObservation(Vector3.zero);
+                //sensor.AddObservation(Vector3.zero);
+                sensor.AddObservation(0f);
+                sensor.AddObservation(0f);
                 sensor.AddObservation(false);
                 sensor.AddObservation(0f);
             }
@@ -172,7 +177,7 @@ public class AnimalAgent : Agent
         if (currentEnergy <= 0 && !isDoneCalled)
         {
             isDoneCalled = true;
-            SubtractReward(1f);
+            SubtractReward(0.1f);
             Debug.Log($"Current Reward: {GetCumulativeReward()}");
             EndEpisode();
         }
@@ -187,6 +192,8 @@ public class AnimalAgent : Agent
         }
 
         currentEnergy--;
+
+        enemy.UpdateEnemy();
     }
 
     private void TryConsume()
@@ -287,6 +294,7 @@ public class AnimalAgent : Agent
             EndEpisode();
         }
 
+        Debug.Log($"Current target: {target.name}");
         startedConsumption = false;
     }
 

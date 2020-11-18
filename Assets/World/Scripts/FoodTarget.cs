@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Enum;
+using UnityEngine;
 
 public class FoodTarget : BaseTarget, IConsumable
 {
@@ -24,15 +25,17 @@ public class FoodTarget : BaseTarget, IConsumable
     [SerializeField] private float energyValue;
     
     [HideInInspector] public float hp;
-    private float[] yPos;
+    private float yPos;
 
     public bool IsConsumed => hp <= 0;
     public override bool IsValid => !IsConsumed;
 
+    private float allowedPositionRange { get; set; }
+
     void Start()
     {
         hp = Random.Range(10f, healthRange);
-        yPos = new float[] { transform.localPosition.y - 5, transform.localPosition.y + 5 }; // just used to randomize Y value
+        yPos = transform.localPosition.y;//new float[] { transform.localPosition.y - 5, transform.localPosition.y + 5 }; // just used to randomize Y value
     }
 
     public float Consume(int value)
@@ -50,7 +53,7 @@ public class FoodTarget : BaseTarget, IConsumable
         float scale = Random.Range(minScale, maxScale);
 
         hp = Random.Range(10f, healthRange);
-        transform.localPosition = new Vector3(Random.Range(-1f, 1f) * positionRange, Random.Range(yPos[0], yPos[1]), Random.Range(-1f, 1f) * positionRange);        
+        transform.localPosition = new Vector3(Random.Range(-1f, 1f) * allowedPositionRange, yPos, Random.Range(-1f, 1f) * allowedPositionRange);        
         transform.localScale = new Vector3(scale, transform.localScale.y, scale);
         TargetHit = false;
     }
