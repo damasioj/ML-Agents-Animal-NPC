@@ -826,12 +826,6 @@ PrefabInstance:
       propertyPath: DemonstrationDirectory
       value: Demonstrations
       objectReference: {fileID: 0}
-    - target: {fileID: 1953516760485064244, guid: 9f33aefe868898243bb50b113141d15f,
-        type: 3}
-      propertyPath: m_Model
-      value: 
-      objectReference: {fileID: 5022602860645237092, guid: e989398c7ebcfb449b3d8a4c09cf95fb,
-        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9f33aefe868898243bb50b113141d15f, type: 3}
 --- !u!114 &3928173515753778563 stripped

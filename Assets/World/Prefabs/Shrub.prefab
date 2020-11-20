@@ -421,7 +421,7 @@ MonoBehaviour:
   healthRange: 100
   positionRange: 100
   minScale: 5
-  maxScale: 20
+  maxScale: 10
   energyValue: 10
   hp: 9.350787
 --- !u!135 &2462547982209890187

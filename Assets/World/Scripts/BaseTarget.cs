@@ -1,5 +1,4 @@
-﻿using Assets.Enum;
-using UnityEngine;
+﻿using UnityEngine;
 
 public abstract class BaseTarget : MonoBehaviour
 {

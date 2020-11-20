@@ -1,5 +1,4 @@
-﻿using Assets.Enum;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FoodTarget : BaseTarget, IConsumable
 {
@@ -30,8 +29,6 @@ public class FoodTarget : BaseTarget, IConsumable
     public bool IsConsumed => hp <= 0;
     public override bool IsValid => !IsConsumed;
 
-    private float allowedPositionRange { get; set; }
-
     void Start()
     {
         hp = Random.Range(10f, healthRange);
@@ -53,7 +50,7 @@ public class FoodTarget : BaseTarget, IConsumable
         float scale = Random.Range(minScale, maxScale);
 
         hp = Random.Range(10f, healthRange);
-        transform.localPosition = new Vector3(Random.Range(-1f, 1f) * allowedPositionRange, yPos, Random.Range(-1f, 1f) * allowedPositionRange);        
+        transform.localPosition = new Vector3(Random.Range(-1f, 1f) * positionRange, yPos, Random.Range(-1f, 1f) * positionRange);        
         transform.localScale = new Vector3(scale, transform.localScale.y, scale);
         TargetHit = false;
     }

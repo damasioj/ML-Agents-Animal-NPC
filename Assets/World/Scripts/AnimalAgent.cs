@@ -186,7 +186,7 @@ public class AnimalAgent : Agent
         Move(vectorAction);
 
         // Action (eat)
-        if (Convert.ToBoolean(vectorAction[2]))
+        if (isAtTarget)
         {
             TryConsume();
         }
@@ -302,7 +302,7 @@ public class AnimalAgent : Agent
     {
         actions[0] = Input.GetAxis("Horizontal");
         actions[1] = Input.GetAxis("Vertical");
-        actions[2] = Convert.ToSingle(Input.GetKey(KeyCode.E));
+        //actions[2] = Convert.ToSingle(Input.GetKey(KeyCode.E));
     }
 
     private void SubtractReward(float value)
