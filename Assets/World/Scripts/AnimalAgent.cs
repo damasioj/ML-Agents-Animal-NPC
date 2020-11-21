@@ -302,7 +302,6 @@ public class AnimalAgent : Agent
     {
         actions[0] = Input.GetAxis("Horizontal");
         actions[1] = Input.GetAxis("Vertical");
-        //actions[2] = Convert.ToSingle(Input.GetKey(KeyCode.E));
     }
 
     private void SubtractReward(float value)
