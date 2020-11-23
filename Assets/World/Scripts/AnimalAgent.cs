@@ -144,7 +144,7 @@ public class AnimalAgent : Agent
             {
                 // target
                 sensor.AddObservation(target.transform.position.x); // 2
-                sensor.AddObservation(target.transform.position.y);
+                sensor.AddObservation(target.transform.position.z);
                 sensor.AddObservation(isAtTarget); // 1
                 sensor.AddObservation(target.hp); // 1
             }
@@ -186,7 +186,7 @@ public class AnimalAgent : Agent
         Move(vectorAction);
 
         // Action (eat)
-        if (isAtTarget)
+        if (Convert.ToBoolean(vectorAction[2]))
         {
             TryConsume();
         }
@@ -302,6 +302,7 @@ public class AnimalAgent : Agent
     {
         actions[0] = Input.GetAxis("Horizontal");
         actions[1] = Input.GetAxis("Vertical");
+        actions[2] = Convert.ToSingle(Input.GetKey(KeyCode.E));
     }
 
     private void SubtractReward(float value)

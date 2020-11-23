@@ -419,8 +419,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthRange: 100
-  positionRange: 100
-  minScale: 5
+  positionRange: 50
+  minScale: 2
   maxScale: 10
   energyValue: 10
   hp: 9.350787
